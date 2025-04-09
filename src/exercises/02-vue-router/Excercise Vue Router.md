@@ -164,6 +164,273 @@ router.beforeEach((to, from, next) => {
 
 ---
 
+
+## 📦 Exercise 6: Dinamyc Routing (addRoute)
+
+**Objective:** Create a Vue application with Vue Router and try to dynamically add a /profile route that loads a Profile.vue component.
+
+### Steps:
+
+1. Define the router with a static route for /dashboard.
+2. Use router.addRoute() to add the /profile route at runtime.
+3. Create the component for Profile.
+4. Test navigation to /profile
+
+```js
+{
+  path: "/dashboard",
+  component: Dashboard,
+}
+```
+
+```vue
+<template>
+  <div>
+    Dashboard
+  </div>
+</template>
+
+<script setup>
+  import router from '../router'
+  import Profile from '../views/Profile.vue'
+
+  router.addRoute({ path: '/profile', name: 'profile', component: Profile });
+  console.log('Route /profile added dynamically');
+
+  setTimeout(() => {
+    router.push('/profile');
+  }, 2000);
+</script>
+```
+
+```vue
+<template>
+  <div>
+    Profile
+  </div>
+</template>
+```
+
+---
+
+## 🧩 Exercise 7: Dinamyc Routing (removeRoute)
+
+**Objective:** Use the Dashboard component to test a new dynamic route and then remove it.
+
+### Steps:
+
+1. Create the component for Admin.
+2. Dynamically add a /admin route in the Dashboard component.
+3. Use router.hasRoute('admin') to check if it exists.
+4. If the route exists, remove it with router.removeRoute('admin').
+5. Use router.push() to return to Dashboard.
+
+```vue
+<template>
+  <div>
+    Admin
+  </div>
+</template>
+```
+
+```vue
+<template>
+  <div>
+    Dashboard
+  </div>
+</template>
+
+<script setup>
+  import router from '../router'
+  import Admin from '../views/Admin.vue'
+
+  router.addRoute({ path: '/admin', name: 'admin', component: Admin });
+  console.log('Route /admin added dynamically');
+
+  setTimeout(() => {
+    router.push('/admin');
+
+    if (router.hasRoute('admin')) {
+      console.log('Removing route /admin...');
+      router.removeRoute('admin');      
+    }
+  }, 2000);
+</script>
+```
+
+---
+
+## 🔒 Exercise 8: Route Meta Fields (meta.requiresAuth)
+
+**Objective:** Use meta.requiresAuth to restrict access.
+
+### Steps:
+
+1. Create the component for Contacts.
+2. Define a /contacts route with { meta: { requiresAuth: true } }, in the Dashboard component.
+3. Add a navigation guard (beforeEach) in the router that redirects to /login if the user is not authenticated.
+
+```vue
+<template>
+  <div>
+    Contacts
+  </div>
+</template>
+```
+
+```vue
+<template>
+  <div>
+    Dashboard
+  </div>
+</template>
+
+<script setup>
+  import router from '../router'
+  import Contacts from '../views/Contacts.vue'
+
+  router.addRoute({ path: '/contacts', name: 'contacts', component: Contacts, meta: { requiresAuth: true } });
+  console.log('Route /contacts added dynamically');
+
+  setTimeout(() => {
+    router.push('/contacts');
+  }, 2000);
+</script>
+```
+
+```js
+const routes = [
+ ...
+]
+
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = false; // Simula autenticación
+
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    console.log('Access restricted, redirecting to Login');
+    next({ name: 'Login' })
+  } else {
+    next();
+  }
+});
+```
+
+---
+
+## 🛡️ Exercise 9: Route Meta Fields (meta.title)
+
+**Objective:** Update the page title using meta.title
+
+### Steps:
+
+1. Create the component for About.
+2. Define a /about route with a meta.title field, in the Dashboard component.
+3. Use afterEach to update the tab title on navigation.
+
+```vue
+<template>
+  <div>
+    About
+  </div>
+</template>
+```
+
+```vue
+<template>
+  <div>
+    Dashboard
+  </div>
+</template>
+
+<script setup>
+  import router from '../router'
+  import About from '../views/About.vue'
+
+  router.addRoute({ path: '/about', component: About, meta: { title: 'About Accenture' } });
+  console.log('Route /about added dynamically');
+
+  setTimeout(() => {
+    router.push('/about');
+
+    router.afterEach((to) => {
+      document.title = to.meta.title || 'About Us';
+    });
+  }, 2000);
+</script>
+```
+
+✅ **Quiz:** What value will be used if a route doesn't have meta.title?
+
+---
+
+## 🧊 Exercise 10: Typed Routes
+
+**Objective:** Define and use typed routes.
+
+### Steps:
+
+1. Create the component for User. 
+2. Add the User route in the index.ts file
+3. Use router.push() from any component.
+
+```vue
+<template>
+  <div>
+    User ID: {{ $route.params.id }}
+  </div>
+</template>
+```
+
+```js
+{
+  path: '/user/:id',
+  name: 'User',
+  component: User
+},
+```
+
+```vue
+<script setup>
+  router.push({ path: '/user/3' });
+  // router.push({ name: 'User', params: { id: '123' } });
+</script>
+```
+
+---
+
+## 🧊 Exercise 11: Type Routes (useRoute)
+
+**Objective:** Access route parameters with types
+
+### Steps:
+
+1. Use the User component.
+2. Apply useRoute() to get the id parameter in User.vue.
+3. Navigate to the URL /user/123.
+
+```vue
+<template>
+  <div>User ID: {{ userId }}</div>
+</template>
+
+<script setup>
+  import { useRoute } from 'vue-router';
+
+  const route = useRoute()
+  const userId = route.params.id
+</script>
+```
+
+```js
+{
+  path: '/user/:id',
+  name: 'User',
+  component: User
+},
+```
+
+---
+
 ## ✅ Summary of Exercises
 
 Build out an e-commerce site with:
@@ -173,6 +440,12 @@ Build out an e-commerce site with:
 - Route guard for `/` (user must be logged in)
 - Global guard for `/admin` (admin-only access)
 - Lazy-loaded routes for `/product/:id`
+
+- Add and remove dynamic routes using `addRoute()` and `removeRoute()` (Dynamic Routing)
+- `/contacts` route protected by a navigation guard using `meta.requiresAuth` (Route Meta Fields)
+- `/about` route added dynamically and updates the tab title using `meta.title` (Route Meta Fields)
+- `/user/:id` demonstrating the use of typed route parameters using `router.push()` with `name` and `params`
+- User.vue component using `useRoute()` to access typed route parameters
 
 ---
 
